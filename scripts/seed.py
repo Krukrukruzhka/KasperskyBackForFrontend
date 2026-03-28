@@ -47,17 +47,26 @@ def generate_employees(count: int = 500) -> list:
         else:
             name = fake.first_name_female() + " " + fake.last_name_female()
         
-        # Генерируем username на основе имени
+        # Генерируем username на основе имени (без @ в начале)
         username = fake.user_name()
+        if username.startswith('@'):
+            username = username[1:]  # Убираем @ если есть
+        
+        # Генерируем телефон в формате +7 (9xx) xxx-xx-xx
+        phone = f"+7 ({random.randint(900, 999)}) {random.randint(100, 999):03d}-{random.randint(10, 99):02d}-{random.randint(10, 99):02d}"
+        
+        # age и sex теперь опциональны - иногда оставляем None
+        age = random.randint(20, 65) if random.random() > 0.2 else None
+        sex_value = sex if random.random() > 0.2 else None
         
         employee = (
             name,
             username,
             random.choice(groups),
-            fake.phone_number(),
+            phone,
             fake.email(),
-            random.randint(20, 65),
-            sex
+            age,
+            sex_value
         )
         employees.append(employee)
     

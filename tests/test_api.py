@@ -125,15 +125,15 @@ class TestEmployeeAPI:
         invalid_data = {
             "name": "John Smith",
             "username": "johnsmith",
-            "phone": "+7-999-123-45-67",
+            "phone": "+7 (999) 123-45-67",
             "email": "john@example.com"
-            # Отсутствуют age и sex
+            # Отсутствуют age и sex (теперь они опциональны)
         }
         
         response = client.post("/employees/", json=invalid_data)
         
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-        assert "Обязательное поле" in response.json()["detail"]
+        # Теперь age и sex опциональны, поэтому запрос должен пройти
+        assert response.status_code == status.HTTP_201_CREATED
 
     def test_create_employee_invalid_group(self, client):
         """Тест создания сотрудника с недопустимой группой."""
@@ -141,7 +141,7 @@ class TestEmployeeAPI:
             "name": "John Smith",
             "username": "johnsmith",
             "group": "InvalidGroup",
-            "phone": "+7-999-123-45-67",
+            "phone": "+7 (999) 123-45-67",
             "email": "john@example.com",
             "age": 30,
             "sex": "M"
@@ -169,7 +169,7 @@ class TestEmployeeAPI:
         data = {
             "name": "Jane Doe",
             "username": "janedoe",
-            "phone": "+7-999-000-00-00",
+            "phone": "+7 (999) 000-00-00",
             "email": "jane@example.com",
             "age": 25,
             "sex": "F"
@@ -179,3 +179,53 @@ class TestEmployeeAPI:
 
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json()["group"] is None
+
+    def test_create_employee_invalid_phone_format(self, client):
+        """Тест создания сотрудника с неверным форматом телефона."""
+        invalid_data = {
+            "name": "John Smith",
+            "username": "johnsmith",
+            "group": "CDM/Managers",
+            "phone": "+7-999-123-45-67",  # Неправильный формат
+            "email": "john@example.com",
+            "age": 30,
+            "sex": "M"
+        }
+        
+        response = client.post("/employees/", json=invalid_data)
+        
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert "Телефонный номер должен быть в формате" in response.json()["detail"]
+
+    def test_create_employee_invalid_username(self, client):
+        """Тест создания сотрудника с username, начинающимся с @."""
+        invalid_data = {
+            "name": "John Smith",
+            "username": "@johnsmith",  # Начинается с @
+            "group": "CDM/Managers",
+            "phone": "+7 (999) 123-45-67",
+            "email": "john@example.com",
+            "age": 30,
+            "sex": "M"
+        }
+        
+        response = client.post("/employees/", json=invalid_data)
+        
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert "Username не должен начинаться с символа @" in response.json()["detail"]
+
+    def test_create_employee_without_age_sex(self, client):
+        """Тест создания сотрудника без age и sex (теперь они опциональны)."""
+        data = {
+            "name": "Jane Doe",
+            "username": "janedoe",
+            "phone": "+7 (999) 000-00-00",
+            "email": "jane@example.com"
+            # age и sex отсутствуют
+        }
+
+        response = client.post("/employees/", json=data)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.json()["age"] is None
+        assert response.json()["sex"] is None

@@ -30,8 +30,8 @@ class Employee:
     group: Optional[str] = None
     phone: str = ""
     email: str = ""
-    age: int = 0
-    sex: str = ""
+    age: Optional[int] = None
+    sex: Optional[str] = None
     
     def to_dict(self) -> dict:
         """Преобразует объект в словарь."""
@@ -45,8 +45,8 @@ class EmployeeCreate:
     username: str
     phone: str
     email: str
-    age: int
-    sex: str
+    age: Optional[int] = None
+    sex: Optional[str] = None
     group: Optional[str] = None
     
     def to_dict(self) -> dict:

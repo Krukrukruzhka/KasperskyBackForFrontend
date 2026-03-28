@@ -22,8 +22,8 @@ def client():
         "group" TEXT,
         phone TEXT NOT NULL,
         email TEXT NOT NULL,
-        age INTEGER NOT NULL,
-        sex TEXT NOT NULL
+        age INTEGER,
+        sex TEXT
     )
     """
     conn.execute(create_table_sql)
@@ -56,7 +56,7 @@ def sample_employee():
         "name": "John Smith",
         "username": "johnsmith",
         "group": "CDM/Managers",
-        "phone": "+7-999-123-45-67",
+        "phone": "+7 (999) 123-45-67",
         "email": "john.smith@example.com",
         "age": 30,
         "sex": "M"

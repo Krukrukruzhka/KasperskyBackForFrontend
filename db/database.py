@@ -39,8 +39,8 @@ def init_db(conn: sqlite3.Connection) -> None:
         "group" TEXT,
         phone TEXT NOT NULL,
         email TEXT NOT NULL,
-        age INTEGER NOT NULL,
-        sex TEXT NOT NULL
+        age INTEGER,
+        sex TEXT
     )
     """
     

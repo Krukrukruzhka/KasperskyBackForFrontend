@@ -46,13 +46,31 @@ async def create_employee(request: Request, conn: sqlite3.Connection = Depends(g
         data = await request.json()
         
         # Валидация обязательных полей
-        required_fields = ['name', 'username', 'phone', 'email', 'age', 'sex']
+        required_fields = ['name', 'username', 'phone', 'email']
         for field in required_fields:
             if field not in data:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                     detail=f"Обязательное поле '{field}' отсутствует"
                 )
+
+        # Валидация username (не должен начинаться с @)
+        username = data['username']
+        if username.startswith('@'):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Username не должен начинаться с символа @"
+            )
+
+        # Валидация телефонного номера в формате +7 (9xx) xxx-xx-xx
+        phone = data['phone']
+        import re
+        phone_pattern = r'^\+7 \(9\d{2}\) \d{3}-\d{2}-\d{2}$'
+        if not re.match(phone_pattern, phone):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Телефонный номер должен быть в формате: +7 (9xx) xxx-xx-xx"
+            )
         
         # Валидация группы
         group_value = data.get('group')
@@ -69,8 +87,8 @@ async def create_employee(request: Request, conn: sqlite3.Connection = Depends(g
             username=data['username'],
             phone=data['phone'],
             email=data['email'],
-            age=data['age'],
-            sex=data['sex'],
+            age=data.get('age'),
+            sex=data.get('sex'),
             group=group_value
         )
         
@@ -97,6 +115,26 @@ async def update_employee(employee_id: int, request: Request, conn: sqlite3.Conn
         # Парсим JSON вручную
         data = await request.json()
         
+        # Валидация username (если обновляется)
+        if 'username' in data:
+            username = data['username']
+            if username.startswith('@'):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Username не должен начинаться с символа @"
+                )
+
+        # Валидация телефонного номера (если обновляется)
+        if 'phone' in data:
+            phone = data['phone']
+            import re
+            phone_pattern = r'^\+7 \(9\d{2}\) \d{3}-\d{2}-\d{2}$'
+            if not re.match(phone_pattern, phone):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Телефонный номер должен быть в формате: +7 (9xx) xxx-xx-xx"
+                )
+
         # Валидация группы
         group_value = data.get('group')
         if group_value is not None and group_value not in EmployeeGroup.values():
