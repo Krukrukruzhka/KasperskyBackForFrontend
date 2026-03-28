@@ -12,6 +12,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from db.database import get_connection, init_db
+from models.employee import EmployeeGroup
 
 # Настраиваем логирование
 logging.basicConfig(level=logging.INFO)
@@ -32,12 +33,8 @@ def generate_employees(count: int = 500) -> list:
     """
     employees = []
     
-    # Список возможных групп
-    groups = [
-        "Development", "Testing", "Analytics", "Project Management",
-        "Design", "DevOps", "System Administration",
-        "Business Analysis", "Product Management", "Technical Writing"
-    ]
+    # Список возможных групп (включая None для сотрудников без группы)
+    groups = EmployeeGroup.values() + [None]
     
     # Список возможных полов
     sexes = ["M", "F"]

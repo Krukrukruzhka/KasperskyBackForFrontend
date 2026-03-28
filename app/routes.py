@@ -3,7 +3,7 @@ import sqlite3
 import logging
 from typing import List
 
-from models.employee import Employee, EmployeeCreate, EmployeeUpdate
+from models.employee import Employee, EmployeeCreate, EmployeeUpdate, EmployeeGroup
 from db.repository import EmployeeRepository
 from db.database import get_db
 
@@ -54,6 +54,15 @@ async def create_employee(request: Request, conn: sqlite3.Connection = Depends(g
                     detail=f"Обязательное поле '{field}' отсутствует"
                 )
         
+        # Валидация группы
+        group_value = data.get('group')
+        if group_value is not None and group_value not in EmployeeGroup.values():
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Недопустимое значение группы '{group_value}'. "
+                       f"Допустимые значения: {EmployeeGroup.values()}"
+            )
+
         # Создаем объект EmployeeCreate
         employee_data = EmployeeCreate(
             name=data['name'],
@@ -62,7 +71,7 @@ async def create_employee(request: Request, conn: sqlite3.Connection = Depends(g
             email=data['email'],
             age=data['age'],
             sex=data['sex'],
-            group=data.get('group')
+            group=group_value
         )
         
         employee = EmployeeRepository.create(conn, employee_data)
@@ -88,11 +97,20 @@ async def update_employee(employee_id: int, request: Request, conn: sqlite3.Conn
         # Парсим JSON вручную
         data = await request.json()
         
+        # Валидация группы
+        group_value = data.get('group')
+        if group_value is not None and group_value not in EmployeeGroup.values():
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Недопустимое значение группы '{group_value}'. "
+                       f"Допустимые значения: {EmployeeGroup.values()}"
+            )
+
         # Создаем объект EmployeeUpdate
         update_data = EmployeeUpdate(
             name=data.get('name'),
             username=data.get('username'),
-            group=data.get('group'),
+            group=group_value,
             phone=data.get('phone'),
             email=data.get('email'),
             age=data.get('age'),

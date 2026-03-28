@@ -1,5 +1,24 @@
 from dataclasses import dataclass, asdict
 from typing import Optional
+from enum import Enum
+
+
+class EmployeeGroup(str, Enum):
+    """Допустимые группы сотрудников."""
+    CDM_MANAGERS = 'CDM/Managers'
+    CDN_MANAGERS = 'CDN/Managers'
+    CDM_FINANCIALS = 'CDM/Financials'
+    CDN_HUMAN_RESOURCES = 'CDN/Human resources'
+    CDN_KVANTS = 'CDN/Kvants'
+    CDN_OUTSOURCED = 'CDN/Outsourced'
+    CDN_SALES = 'CDN/Sales'
+    CDN_TOP_KEVINS = 'CDN/Top Kevins'
+    CONVEO = 'CONVEO'
+
+    @classmethod
+    def values(cls) -> list:
+        """Возвращает список допустимых значений."""
+        return [e.value for e in cls]
 
 
 @dataclass

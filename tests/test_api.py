@@ -69,7 +69,7 @@ class TestEmployeeAPI:
         update_data = {
             "name": "Peter Peterson",
             "username": "peterp",
-            "group": "Management",
+            "group": "CDN/Sales",
             "age": 35
         }
         
@@ -134,3 +134,48 @@ class TestEmployeeAPI:
         
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert "Обязательное поле" in response.json()["detail"]
+
+    def test_create_employee_invalid_group(self, client):
+        """Тест создания сотрудника с недопустимой группой."""
+        invalid_data = {
+            "name": "John Smith",
+            "username": "johnsmith",
+            "group": "InvalidGroup",
+            "phone": "+7-999-123-45-67",
+            "email": "john@example.com",
+            "age": 30,
+            "sex": "M"
+        }
+        
+        response = client.post("/employees/", json=invalid_data)
+        
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert "Недопустимое значение группы" in response.json()["detail"]
+
+    def test_update_employee_invalid_group(self, client, sample_employee):
+        """Тест обновления сотрудника с недопустимой группой."""
+        # Создаем сотрудника
+        create_response = client.post("/employees/", json=sample_employee)
+        employee_id = create_response.json()["id"]
+
+        update_data = {"group": "NotAValidGroup"}
+        response = client.put(f"/employees/{employee_id}", json=update_data)
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert "Недопустимое значение группы" in response.json()["detail"]
+
+    def test_create_employee_without_group(self, client):
+        """Тест создания сотрудника без группы (group=None допустимо)."""
+        data = {
+            "name": "Jane Doe",
+            "username": "janedoe",
+            "phone": "+7-999-000-00-00",
+            "email": "jane@example.com",
+            "age": 25,
+            "sex": "F"
+        }
+
+        response = client.post("/employees/", json=data)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.json()["group"] is None

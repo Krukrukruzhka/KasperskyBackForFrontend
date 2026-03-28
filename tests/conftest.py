@@ -55,7 +55,7 @@ def sample_employee():
     return {
         "name": "John Smith",
         "username": "johnsmith",
-        "group": "Development",
+        "group": "CDM/Managers",
         "phone": "+7-999-123-45-67",
         "email": "john.smith@example.com",
         "age": 30,
